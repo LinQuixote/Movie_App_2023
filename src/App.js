@@ -1,71 +1,59 @@
-import Proptypes from "prop-types";
+// import Proptypes from "prop-types";
+import React from "react";
+import axios from "axios";
+import Movie from "./Movie";
+import "./App.css";
 
-const Food = ({ name, url, rating }) => {
-  return (
-    <div>
-      <h2> 나는 {name}을 좋아해</h2>
-      <h3>{rating}/5</h3>
-      <img src={url} alt={name}></img>
-      {/* <img src={props.url} /> */}
-    </div>
-  );
-};
+class App extends React.Component {
+  state = {
+    isLoading: true,
+    movies: [],
+  };
 
-Food.propTypes = {
-  name: Proptypes.string.isRequired,
-  url: Proptypes.string.isRequired,
-  rating: Proptypes.number.isRequired,
-};
+  getMovies = async () => {
+    const {
+      data: {
+        data: { movies },
+      },
+    } = await axios.get(
+      "https://yts-proxy.nomadcoders1.now.sh/list_movies.json?sort_by=rating"
+    );
+    this.setState({ movies, isLoading: false });
+  };
 
-const food_info = [
-  {
-    key: 1,
-    name: "삼겹살",
-    url: "https://cdn.mindgil.com/news/photo/202105/71358_8221_3033.jpg",
-    rating: 5,
-  },
-  {
-    key: 2,
-    name: "오일 파스타",
-    url: "https://recipe1.ezmember.co.kr/cache/recipe/2020/02/17/de10670dbafcdaf709537c8018c303741.jpg",
-    rating: 4.6,
-  },
-  {
-    key: 3,
-    name: "자장면",
-    url: "https://post-phinf.pstatic.net/MjAxODExMDZfODMg/MDAxNTQxNDY2NTE1NDY4.yGiaRzLRjGH1zh_DsYOJXXNDauuFOfe4vq1-AIpWYOgg.hIUENVUe4XmSVmS7OWNswwS3LtMiv8E6Y6yyrdTyA-Qg.JPEG/GettyImages-jv10954642.jpg?type=w1200",
-    rating: 4.2,
-  },
-  {
-    key: 4,
-    name: "초코케잌",
-    url: "https://png.pngtree.com/png-vector/20210909/ourlarge/pngtree-chocolate-cake-png-image_3889185.jpg",
-    rating: 3.5,
-  },
-];
+  componentDidMount() {
+    this.getMovies();
+  }
 
-// const renderFood = (dish) => {
-//   return <Food name={dish.name} url={dish.url} />;
-// };
-
-const App = () => {
-  return (
-    <div>
-      {food_info.map(function (food) {
-        // console.log(food);
-        return (
-          <Food
-            key={food.key}
-            name={food.name}
-            url={food.url}
-            rating={food.rating}
-          />
-        );
-      })}
-      {/* {food_info.map(renderFood)}
-      {console.log(food_info.map(renderFood))} */}
-    </div>
-  );
-};
+  // render 함수를 자동으로 실행한다
+  render() {
+    const { isLoading, movies } = this.state;
+    return (
+      <div>
+        {isLoading ? (
+          <div className="loader">
+            <span className="loader__text">Loading...</span>
+          </div>
+        ) : (
+          <div className="movies">
+            {movies.map((movie, index) => {
+              return (
+                <Movie
+                  key={movie.id}
+                  title={movie.title}
+                  rating={movie.rating}
+                  year={movie.year}
+                  poster={movie.medium_cover_image}
+                  summary={movie.summary}
+                  genres={movie.genres}
+                />
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
+}
 
 export default App;
